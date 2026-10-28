@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ઓનલાઈન બદલી અરજી સુધારા ફોર્મ</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for Gujarati (Rasa Bold) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rasa:wght@600;700&display=swap" rel="stylesheet">
+    <!-- html2canvas for Image Download -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        :root {
+            --page-width: 210mm;
+            --page-height: 297mm;
+        }
+
+        body {
+            font-family: 'Rasa', serif;
+            font-weight: 600;
+            background-color: #f3f4f6;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Marquee Animation */
+        @keyframes marquee {
+            0% { transform: translateX(100vw); }
+            100% { transform: translateX(-100%); }
+        }
+        .animate-marquee {
+            display: inline-block;
+            white-space: nowrap;
+            animation: marquee 20s linear infinite;
+        }
+
+        /* Perfect A4 Sizing */
+        .a4-container {
+            width: var(--page-width);
+            height: var(--page-height); /* Strict fixed height */
+            margin: 120px auto 20px auto; /* Space for top controls */
+            background: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            position: relative;
+            padding: 10mm; /* Reduced outer padding */
+            box-sizing: border-box;
+            overflow: hidden; /* Prevent any accidental spillover */
+        }
+
+        /* Official Double Line Border */
+        .page-border {
+            border: 4px double #000;
+            width: 100%;
+            height: 100%;
+            padding: 8mm; /* Inner padding inside border */
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Editable Span styling */
+        .editable-span {
+            display: inline-block;
+            min-width: 100px;
+            border-bottom: 1.5px dashed #4b5563;
+            outline: none;
+            padding: 0 4px;
+            color: #000;
+            transition: border-color 0.2s;
+            vertical-align: bottom;
+            line-height: 1.2;
+            word-break: break-word;
+        }
+
+        .editable-span:empty::before {
+            content: "\200B"; /* Zero width space to maintain height */
+        }
+
+        .editable-span:focus {
+            border-bottom: 2px solid #2563eb;
+            background-color: #f8fafc;
+        }
+
+        .min-w-sm { min-width: 80px; }
+        .min-w-lg { min-width: 180px; text-align: center; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #000;
+            padding: 6px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        td[contenteditable="true"]:focus {
+            background-color: #f0fdf4;
+            outline: none;
+        }
+
+        /* Print Specific Styles */
+        @media print {
+            @page {
+                size: A4;
+                margin: 0;
+            }
+            body {
+                background: white;
+                margin: 0;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .a4-container {
+                margin: 0;
+                box-shadow: none;
+                padding: 10mm;
+                height: 297mm; /* Ensure absolute exact print size */
+                page-break-after: avoid;
+                page-break-before: avoid;
+            }
+            .editable-span {
+                border-bottom: 1px dashed #000 !important;
+            }
+        }
+    </style>
+</head>
+<body class="text-[16px] leading-relaxed">
+
+    <!-- Top Fixed Controls (Hidden on Print) -->
+    <div class="no-print fixed top-0 left-0 right-0 z-50 flex flex-col shadow-md">
+        <!-- Marquee -->
+        <div class="bg-yellow-200 text-red-700 font-bold text-lg py-1 overflow-hidden w-full">
+            <div class="animate-marquee">પરબતભાઈ કરમુર - શ્રી કોરાડા વાડી પ્રાથમિક શાળા</div>
+        </div>
+        <!-- Buttons -->
+        <div class="bg-white p-3 flex justify-center gap-4">
+            <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded shadow flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
+                Print / Save PDF
+            </button>
+            <button onclick="downloadImage()" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded shadow flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Download JPG
+            </button>
+            <button onclick="clearForm()" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded shadow flex items-center gap-2 ml-4">
+                Clear Data
+            </button>
+        </div>
+    </div>
+
+    <!-- Padding for fixed header space in web view is handled by container margin-top -->
+
+    <div class="a4-container" id="capture-area">
+        <!-- Official Border -->
+        <div class="page-border">
+            
+            <!-- Top Right Section (Details) -->
+            <div class="flex justify-end mb-4">
+                <div class="flex flex-col gap-1 w-auto min-w-[320px] max-w-[55%] text-[15px]">
+                    <div class="flex">
+                        <span class="whitespace-nowrap w-24">શિક્ષકનું નામ :-</span>
+                        <span contenteditable="true" id="top_teacher_name" class="editable-span flex-grow sync-teacher"></span>
+                    </div>
+                    <div class="flex">
+                        <span class="whitespace-nowrap w-24">શાળાનું નામ :-</span>
+                        <span contenteditable="true" id="top_school_name" class="editable-span flex-grow sync-school"></span>
+                    </div>
+                    <div class="flex">
+                        <span class="whitespace-nowrap w-24">તાલુકો :-</span>
+                        <span contenteditable="true" id="top_taluka" class="editable-span flex-grow sync-taluka"></span>
+                    </div>
+                    <div class="flex">
+                        <span class="whitespace-nowrap w-24">અરજી ક્રમાંક :-</span>
+                        <span contenteditable="true" id="top_app_no" class="editable-span flex-grow sync-app"></span>
+                    </div>
+                    <div class="flex">
+                        <span class="whitespace-nowrap w-56">મોબાઈલ નંબર (વોટસઅપ નંબર) :-</span>
+                        <span contenteditable="true" id="mobile_no" class="editable-span flex-grow"></span>
+                    </div>
+                    <div class="flex">
+                        <span class="whitespace-nowrap w-8">તા :-</span>
+                        <span contenteditable="true" id="date_today" class="editable-span flex-grow"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Left Section (To Address) -->
+            <div class="mb-4 font-bold text-[17px]">
+                <p>પ્રતિ,</p>
+                <p>જિલ્લા પ્રાથમિક શિક્ષણાધિકારીશ્રી</p>
+                <p>જિલ્લા શિક્ષણ સમિતિ, દેવભૂમિ દ્વારકા.</p>
+            </div>
+
+            <!-- Subject -->
+            <div class="text-center font-bold text-[17px] mb-4 px-2">
+                વિષય :- ઓનલાઈન બદલી ૨૦૨૬ ના પ્રથમ તબક્કામાં કરેલ અરજીમાં સુધારો કરવા બાબત.
+            </div>
+
+            <!-- Body Paragraph -->
+            <div class="text-justify mb-5 leading-[1.8] text-[16px] indent-10">
+                સવિનય જણાવવાનું કે અમો શ્રી <span contenteditable="true" id="body_teacher_name" class="editable-span min-w-lg font-bold sync-teacher"></span> મુ.શિ./આ.શિ., પ્રાથમિક શાળા <span contenteditable="true" id="body_school_name" class="editable-span min-w-lg font-bold sync-school"></span> તાલુકો <span contenteditable="true" id="body_taluka" class="editable-span min-w-sm font-bold sync-taluka"></span> ખાતે ફરજ બજાવીએ છે. ઓનલાઈન આંતરિક બદલી ૨૦૨૬ ના પ્રથમ તબક્કામાં અમોએ <span contenteditable="true" id="body_app_no" class="editable-span min-w-sm font-bold sync-app"></span> અરજી ક્રમાંકથી પ્રાથમિક/ઉચ્ચપ્રાથમિક વિભાગ (ભાષા/ગણિત-વિજ્ઞાન/સામાજિક વિજ્ઞાન) માં અગ્રતા (વિધવા/વિધુર/અપંગ પ્રા.શિ.દંપતી/સરકારી દંપતી/અનુદાનિત દંપતી/વાલ્મિકી/સિનિયોરિટીથી બદલી માટે અરજી કરેલ છે. અમોએ કરેલ અરજીમાં નીચે મુજબ ક્ષતિ થયેલ છે, જેમાં યોગ્ય સુધારો કરી અરજી મંજૂર કરવા યોગ્ય કરશો.
+            </div>
+
+            <!-- Table Section -->
+            <div class="mb-4">
+                <h3 class="text-center font-bold text-[17px] mb-2">સુધારાની વિગત</h3>
+                <table class="text-[15px]">
+                    <thead>
+                        <tr class="bg-gray-100 print:bg-transparent font-bold">
+                            <th class="w-[20%]">ક્રમ</th>
+                            <th class="w-[20%]">ખાતામાં દાખલ તારીખ</th>
+                            <th class="w-[20%]">સિનિયોરિટી માટેના હુકમની તારીખ</th>
+                            <th class="w-[15%]">જન્મ તારીખ</th>
+                            <th class="w-[25%]">અન્ય સુધારો</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="text-left font-bold">ઓન લાઈન સબમીટ કરેલ તારીખ</td>
+                            <td contenteditable="true" id="t1_c1"></td>
+                            <td contenteditable="true" id="t1_c2"></td>
+                            <td contenteditable="true" id="t1_c3"></td>
+                            <td contenteditable="true" id="t1_c4"></td>
+                        </tr>
+                        <tr>
+                            <td class="text-left font-bold">રેકર્ડના આધારે હુકમના આધારે સુધારો કરવાની થતી તારીખ</td>
+                            <td contenteditable="true" id="t2_c1"></td>
+                            <td contenteditable="true" id="t2_c2"></td>
+                            <td contenteditable="true" id="t2_c3"></td>
+                            <td contenteditable="true" id="t2_c4"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Bottom Right Section (Signatures) - Pushed perfectly to bottom via mt-auto -->
+            <div class="mt-auto flex justify-end pb-2">
+                <div class="flex flex-col gap-6 w-72 text-[16px]">
+                    <div class="flex items-end">
+                        <span class="whitespace-nowrap font-bold">શિક્ષકની સહી :</span>
+                        <div class="border-b-[1.5px] border-dashed border-black flex-grow ml-2 mb-1"></div>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="whitespace-nowrap font-bold">શિક્ષકનું નામ :</span>
+                        <span contenteditable="true" id="bottom_teacher_name" class="editable-span flex-grow ml-2 sync-teacher"></span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        
+        <!-- Faint Footer Outside Border -->
+        <div class="absolute bottom-[3mm] left-0 w-full text-center text-[#999999] opacity-70 text-[13px] tracking-wide pointer-events-none">
+            તાલુકા પંચાયત કચેરી, શિક્ષણ શાખા, દ્વારકા
+        </div>
+    </div>
+
+    <!-- Scripts for Auto-Save, Syncing and Download Image -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Select all editable elements
+            const editables = document.querySelectorAll('[contenteditable="true"]');
+
+            // 1. Load saved data from localStorage
+            editables.forEach(el => {
+                if (el.id) {
+                    const savedValue = localStorage.getItem('form_' + el.id);
+                    if (savedValue) {
+                        el.innerText = savedValue;
+                    }
+                }
+
+                // 2. Save data to localStorage on input and sync
+                el.addEventListener('input', function() {
+                    if (this.id) {
+                        localStorage.setItem('form_' + this.id, this.innerText);
+                    }
+                    syncElements(this);
+                });
+            });
+        });
+
+        // Sync related fields
+        function syncElements(changedElement) {
+            const value = changedElement.innerText;
+            
+            const syncClasses = ['sync-teacher', 'sync-school', 'sync-taluka', 'sync-app'];
+            
+            syncClasses.forEach(syncClass => {
+                if (changedElement.classList.contains(syncClass)) {
+                    document.querySelectorAll('.' + syncClass).forEach(el => {
+                        if (el !== changedElement) {
+                            el.innerText = value;
+                            localStorage.setItem('form_' + el.id, value);
+                        }
+                    });
+                }
+            });
+        }
+
+        // Clear Form Function
+        function clearForm() {
+            if (confirm('શું તમે ખરેખર બધી માહિતી ભૂંસવા માંગો છો?')) {
+                const editables = document.querySelectorAll('[contenteditable="true"]');
+                editables.forEach(el => {
+                    el.innerText = '';
+                    localStorage.removeItem('form_' + el.id);
+                });
+            }
+        }
+
+        // Download as JPG Function
+        function downloadImage() {
+            const captureArea = document.getElementById('capture-area');
+            
+            // Temporarily adjusting for better capture resolution
+            html2canvas(captureArea, {
+                scale: 2, // High resolution
+                useCORS: true,
+                backgroundColor: "#ffffff"
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'Transfer_Correction_Form.jpg';
+                link.href = canvas.toDataURL('image/jpeg', 0.9); // JPG format
+                link.click();
+            });
+        }
+    </script>
+</body>
+</html>
